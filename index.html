@@ -1,110 +1,125 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Random Quote Machine</title>
-
-  <script src="https://unpkg.com/react@17/umd/react.development.js" crossorigin></script>
-  <script src="https://unpkg.com/react-dom@17/umd/react-dom.development.js" crossorigin></script>
-  <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Drum Machine</title>
+  <!-- FreeCodeCamp Test Script -->
   <script src="https://cdn.freecodecamp.org/testable-projects-fcc/v1/bundle.js"></script>
-
+  <!-- React and Babel -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react/17.0.2/umd/react.development.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/17.0.2/umd/react-dom.development.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/6.26.0/babel.min.js"></script>
   <style>
     body {
       font-family: Arial, sans-serif;
+      background: #222;
+      color: white;
       display: flex;
       justify-content: center;
       align-items: center;
       height: 100vh;
-      margin: 0;
-      background: purple;
     }
-
-    #quote-box {
-      background: white;
-      padding: 2rem;
-      border-radius: 10px;
-      max-width: 600px;
+    #drum-machine {
       text-align: center;
-      box-shadow: 0px 0px 15px rgba(0,0,0,0.3);
+      background: #333;
+      padding: 20px;
+      border-radius: 10px;
     }
-
-    #text {
-      font-size: 1.5rem;
-      margin-bottom: 1rem;
+    #display {
+      margin-bottom: 20px;
+      font-size: 1.2em;
+      background: #444;
+      padding: 10px;
+      border-radius: 5px;
     }
-
-    #author {
-      margin-bottom: 1rem;
-      font-style: italic;
-      color: #555;
-    }
-
-    button, a {
-      margin: 0.5rem;
-      padding: 0.5rem 1rem;
+    .drum-pad {
+      width: 80px;
+      height: 80px;
+      margin: 5px;
+      background: #555;
       border: none;
       border-radius: 5px;
-      cursor: pointer;
-      text-decoration: none;
-      font-size: 1rem;
-    }
-
-    #new-quote {
-      background: white;
-      color: purple;
-      font-weight: bold;
-    }
-
-    #tweet-quote {
-      background: black;
+      font-size: 1.5em;
       color: white;
-      font-weight: bold;
+      cursor: pointer;
+    }
+    .pad-container {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
     }
   </style>
 </head>
 <body>
+  <!-- React Root -->
   <div id="root"></div>
 
+  <!-- Your JS goes here -->
   <script type="text/babel">
-    const { useState, useEffect } = React;
-
-    const quotes = [
-      { text: "Life is what happens when you're busy making other plans.", author: "John Lennon" },
-      { text: "Get busy living or get busy dying.", author: "Stephen King" },
-      { text: "The only impossible journey is the one you never begin.", author: "Tony Robbins" },
-      { text: "In the end, we will remember not the words of our enemies, but the silence of our friends.", author: "Martin Luther King Jr." },
-      { text: "Do not go where the path may lead, go instead where there is no path and leave a trail.", author: "Ralph Waldo Emerson" }
+    const sounds = [
+      { key: "Q", id: "Heater-1", url: "https://s3.amazonaws.com/freecodecamp/drums/Heater-1.mp3" },
+      { key: "W", id: "Heater-2", url: "https://s3.amazonaws.com/freecodecamp/drums/Heater-2.mp3" },
+      { key: "E", id: "Heater-3", url: "https://s3.amazonaws.com/freecodecamp/drums/Heater-3.mp3" },
+      { key: "A", id: "Heater-4", url: "https://s3.amazonaws.com/freecodecamp/drums/Heater-4_1.mp3" },
+      { key: "S", id: "Clap", url: "https://s3.amazonaws.com/freecodecamp/drums/Heater-6.mp3" },
+      { key: "D", id: "Open-HH", url: "https://s3.amazonaws.com/freecodecamp/drums/Dsc_Oh.mp3" },
+      { key: "Z", id: "Kick-n'-Hat", url: "https://s3.amazonaws.com/freecodecamp/drums/Kick_n_Hat.mp3" },
+      { key: "X", id: "Kick", url: "https://s3.amazonaws.com/freecodecamp/drums/RP4_KICK_1.mp3" },
+      { key: "C", id: "Closed-HH", url: "https://s3.amazonaws.com/freecodecamp/drums/Cev_H2.mp3" }
     ];
 
-    const App = () => {
-      const [quote, setQuote] = useState({ text: "", author: "" });
+    function DrumPad({ keyTrigger, clipId, url, playSound }) {
+      const handleKeyPress = (e) => {
+        if (e.key.toUpperCase() === keyTrigger) {
+          playSound(keyTrigger, clipId);
+        }
+      };
 
-      useEffect(() => {
-        getRandomQuote();
-      }, []);
+      React.useEffect(() => {
+        document.addEventListener("keydown", handleKeyPress);
+        return () => document.removeEventListener("keydown", handleKeyPress);
+      });
 
-      const getRandomQuote = () => {
-        const randomIndex = Math.floor(Math.random() * quotes.length);
-        setQuote(quotes[randomIndex]);
+      return (
+        <button
+          className="drum-pad"
+          id={clipId}
+          onClick={() => playSound(keyTrigger, clipId)}
+        >
+          {keyTrigger}
+          <audio className="clip" id={keyTrigger} src={url}></audio>
+        </button>
+      );
+    }
+
+    function App() {
+      const [display, setDisplay] = React.useState("Play a sound");
+
+      const playSound = (keyTrigger, clipId) => {
+        const audio = document.getElementById(keyTrigger);
+        audio.currentTime = 0;
+        audio.play();
+        setDisplay(clipId);
       };
 
       return (
-        <div id="quote-box">
-          <div id="text">{quote.text}</div>
-          <div id="author">{quote.author}</div>
-          <button id="new-quote" onClick={getRandomQuote}>New Quote</button>
-          <a
-            id="tweet-quote"
-            href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(`"${quote.text}" - ${quote.author}`)}`}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Tweet
-          </a>
+        <div id="drum-machine">
+          <div id="display">{display}</div>
+          <div className="pad-container">
+            {sounds.map((sound) => (
+              <DrumPad
+                key={sound.key}
+                keyTrigger={sound.key}
+                clipId={sound.id}
+                url={sound.url}
+                playSound={playSound}
+              />
+            ))}
+          </div>
         </div>
       );
-    };
+    }
 
     ReactDOM.render(<App />, document.getElementById("root"));
   </script>
