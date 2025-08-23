@@ -1,101 +1,165 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>JavaScript Calculator</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>25 + 5 Clock</title>
+  <link rel="stylesheet" href="style.css">
   <style>
     body {
+      font-family: Arial, sans-serif;
+      background: #222;
+      color: #fff;
       display: flex;
       justify-content: center;
       align-items: center;
       height: 100vh;
-      background: #1e1e2f;
-      margin: 0;
-      font-family: Arial, sans-serif;
     }
-
-    #calculator {
-      background: #2e2e3e;
+    #clock-container {
+      text-align: center;
+      background: #333;
       padding: 20px;
-      border-radius: 12px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+      border-radius: 10px;
       width: 300px;
     }
-
-    #display {
-      background: #000;
-      color: #0f0;
-      font-size: 2rem;
-      text-align: right;
-      padding: 15px;
-      border-radius: 8px;
-      margin-bottom: 20px;
-      overflow: hidden;
-    }
-
-    .buttons {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 10px;
-    }
-
     button {
-      padding: 20px;
-      font-size: 1.2rem;
-      border: none;
-      border-radius: 8px;
+      margin: 5px;
+      padding: 5px 10px;
+      font-size: 16px;
       cursor: pointer;
-      background: #444;
-      color: white;
-      transition: background 0.2s;
     }
-
-    button:hover {
-      background: #666;
-    }
-
-    #clear {
-      grid-column: span 2;
-      background: #e74c3c;
-    }
-
-    #equals {
-      grid-row: span 2;
-      background: #27ae60;
-    }
-
-    #zero {
-      grid-column: span 2;
+    #time-left {
+      font-size: 48px;
+      margin: 20px 0;
     }
   </style>
 </head>
 <body>
-  <div id="calculator">
-    <div id="display">0</div>
-    <div class="buttons">
-      <button id="clear">AC</button>
-      <button id="divide">/</button>
-      <button id="multiply">*</button>
-      
-      <button id="seven">7</button>
-      <button id="eight">8</button>
-      <button id="nine">9</button>
-      <button id="subtract">-</button>
-      
-      <button id="four">4</button>
-      <button id="five">5</button>
-      <button id="six">6</button>
-      <button id="add">+</button>
-      
-      <button id="one">1</button>
-      <button id="two">2</button>
-      <button id="three">3</button>
-      <button id="equals">=</button>
-      
-      <button id="zero">0</button>
-      <button id="decimal">.</button>
-    </div>
-  </div>
+  <div id="root"></div>
+
+  <script src="https://unpkg.com/react@17/umd/react.development.js"></script>
+  <script src="https://unpkg.com/react-dom@17/umd/react-dom.development.js"></script>
+  <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
+
+  <script src="https://cdn.freecodecamp.org/testable-projects-fcc/v1/bundle.js"></script>
+
+  <script type="text/babel">
+    const { useState, useEffect } = React;
+
+    function App() {
+      const [breakLength, setBreakLength] = useState(5);
+      const [sessionLength, setSessionLength] = useState(25);
+      const [timeLeft, setTimeLeft] = useState(25 * 60);
+      const [isRunning, setIsRunning] = useState(false);
+      const [timerLabel, setTimerLabel] = useState("Session");
+      const [intervalId, setIntervalId] = useState(null);
+
+      const formatTime = (time) => {
+        let minutes = Math.floor(time / 60);
+        let seconds = time % 60;
+        return (
+          (minutes < 10 ? "0" + minutes : minutes) +
+          ":" +
+          (seconds < 10 ? "0" + seconds : seconds)
+        );
+      };
+
+      const handleBreak = (amount) => {
+        if (!isRunning) {
+          let newLength = breakLength + amount;
+          if (newLength > 0 && newLength <= 60) {
+            setBreakLength(newLength);
+          }
+        }
+      };
+
+      const handleSession = (amount) => {
+        if (!isRunning) {
+          let newLength = sessionLength + amount;
+          if (newLength > 0 && newLength <= 60) {
+            setSessionLength(newLength);
+            setTimeLeft(newLength * 60);
+          }
+        }
+      };
+
+      const handleStartStop = () => {
+        if (isRunning) {
+          clearInterval(intervalId);
+          setIsRunning(false);
+          setIntervalId(null);
+        } else {
+          const newInterval = setInterval(() => {
+            setTimeLeft((prev) => {
+              if (prev === 0) {
+                document.getElementById("beep").play();
+                if (timerLabel === "Session") {
+                  setTimerLabel("Break");
+                  return breakLength * 60;
+                } else {
+                  setTimerLabel("Session");
+                  return sessionLength * 60;
+                }
+              }
+              return prev - 1;
+            });
+          }, 1000);
+          setIntervalId(newInterval);
+        }
+        setIsRunning(!isRunning);
+      };
+
+      const handleReset = () => {
+        clearInterval(intervalId);
+        setIsRunning(false);
+        setBreakLength(5);
+        setSessionLength(25);
+        setTimeLeft(25 * 60);
+        setTimerLabel("Session");
+        document.getElementById("beep").pause();
+        document.getElementById("beep").currentTime = 0;
+      };
+
+      return (
+        <div id="clock-container">
+          <h1>25 + 5 Clock</h1>
+          
+          <div className="length-control">
+            <h3 id="break-label">Break Length</h3>
+            <button id="break-decrement" onClick={() => handleBreak(-1)}>-</button>
+            <span id="break-length">{breakLength}</span>
+            <button id="break-increment" onClick={() => handleBreak(1)}>+</button>
+          </div>
+
+          <div className="length-control">
+            <h3 id="session-label">Session Length</h3>
+            <button id="session-decrement" onClick={() => handleSession(-1)}>-</button>
+            <span id="session-length">{sessionLength}</span>
+            <button id="session-increment" onClick={() => handleSession(1)}>+</button>
+          </div>
+
+          <div id="timer">
+            <h2 id="timer-label">{timerLabel}</h2>
+            <div id="time-left">{formatTime(timeLeft)}</div>
+          </div>
+
+          <div id="timer-controls">
+            <button id="start_stop" onClick={handleStartStop}>
+              {isRunning ? "Pause" : "Start"}
+            </button>
+            <button id="reset" onClick={handleReset}>Reset</button>
+          </div>
+
+          <audio
+            id="beep"
+            src="https://raw.githubusercontent.com/freeCodeCamp/cdn/master/build/testable-projects-fcc/audio/BeepSound.wav"
+            preload="auto"
+          />
+        </div>
+      );
+    }
+
+    ReactDOM.render(<App />, document.getElementById("root"));
+  </script>
 </body>
 </html>
