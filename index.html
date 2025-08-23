@@ -1,147 +1,65 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>FCC Markdown Previewer</title>
+  <meta charset="UTF-8">
+  <title>Random Quote Machine</title>
 
-  <!-- React 17 + ReactDOM 17 (works with FCC tests) -->
   <script src="https://unpkg.com/react@17/umd/react.development.js" crossorigin></script>
   <script src="https://unpkg.com/react-dom@17/umd/react-dom.development.js" crossorigin></script>
-
-  <!-- Babel for JSX -->
   <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
-
-  <!-- Marked (Markdown parser) -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/4.3.0/marked.min.js"></script>
-
-  <!-- FCC test suite -->
   <script src="https://cdn.freecodecamp.org/testable-projects-fcc/v1/bundle.js"></script>
 
   <style>
-    /* Safe styles that won’t interfere with FCC tests */
-    :root {
-      --bg: #f7f7fb;
-      --card: #ffffff;
-      --text: #222;
-      --border: #ddd;
-      --accent: #6c63ff;
-    }
-
-    html, body {
-      margin: 0;
-      padding: 0;
-      background: var(--bg);
-      color: var(--text);
-      font-family: system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, "Noto Sans", "Liberation Sans", sans-serif;
-    }
-
-    .container {
-      max-width: 1100px;
-      margin: 40px auto;
-      padding: 0 16px;
-    }
-
-    h1 {
-      text-align: center;
-      margin: 0 0 24px;
-      font-weight: 700;
-      letter-spacing: 0.2px;
-    }
-
-    .panes {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 18px;
-    }
-
-    @media (max-width: 900px) {
-      .panes {
-        grid-template-columns: 1fr;
-      }
-    }
-
-    .panel {
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      box-shadow: 0 4px 16px rgba(0,0,0,0.05);
-      overflow: hidden;
+    body {
+      font-family: Arial, sans-serif;
       display: flex;
-      flex-direction: column;
-      min-height: 380px;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+      background: purple;
     }
 
-    .panel-header {
-      padding: 12px 14px;
-      background: #f0f0ff;
-      border-bottom: 1px solid var(--border);
-      font-weight: 600;
-      color: #3c3a9e;
+    #quote-box {
+      background: white;
+      padding: 2rem;
+      border-radius: 10px;
+      max-width: 600px;
+      text-align: center;
+      box-shadow: 0px 0px 15px rgba(0,0,0,0.3);
     }
 
-    #editor {
-      width: 100%;
-      height: 100%;
-      min-height: 320px;
-      resize: vertical;
-      border: 0;
-      outline: none;
-      padding: 14px;
-      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-      font-size: 14px;
-      line-height: 1.5;
-      background: #fff;
-      color: #222;
+    #text {
+      font-size: 1.5rem;
+      margin-bottom: 1rem;
     }
 
-    #preview {
-      padding: 16px;
-      overflow: auto;
+    #author {
+      margin-bottom: 1rem;
+      font-style: italic;
+      color: #555;
     }
 
-    /* Helpful preview defaults */
-    #preview h1, #preview h2, #preview h3 {
-      margin-top: 1em;
-      border-bottom: 1px solid #eee;
-      padding-bottom: 0.3em;
-    }
-    #preview code {
-      background: #f3f4f6;
-      padding: 2px 6px;
-      border-radius: 4px;
-      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-      font-size: 0.95em;
-    }
-    #preview pre code {
-      display: block;
-      padding: 12px;
-      border-radius: 8px;
-      overflow-x: auto;
-    }
-    #preview blockquote {
-      margin: 1em 0;
-      padding: 0.6em 1em;
-      border-left: 4px solid var(--accent);
-      background: #f8f8ff;
-      color: #444;
-    }
-    #preview ul, #preview ol {
-      padding-left: 1.2em;
-    }
-    #preview img {
-      max-width: 100%;
-      height: auto;
-      display: block;
-      margin: 12px 0;
-    }
-    #preview a {
-      color: var(--accent);
+    button, a {
+      margin: 0.5rem;
+      padding: 0.5rem 1rem;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
       text-decoration: none;
-      border-bottom: 1px dashed var(--accent);
+      font-size: 1rem;
     }
-    #preview a:hover {
-      text-decoration: underline;
-      border-bottom-color: transparent;
+
+    #new-quote {
+      background: white;
+      color: purple;
+      font-weight: bold;
+    }
+
+    #tweet-quote {
+      background: black;
+      color: white;
+      font-weight: bold;
     }
   </style>
 </head>
@@ -149,73 +67,46 @@
   <div id="root"></div>
 
   <script type="text/babel">
-    const { useState } = React;
+    const { useState, useEffect } = React;
 
-    // Configure marked (line breaks -> <br>)
-    marked.setOptions({ breaks: true });
+    const quotes = [
+      { text: "Life is what happens when you're busy making other plans.", author: "John Lennon" },
+      { text: "Get busy living or get busy dying.", author: "Stephen King" },
+      { text: "The only impossible journey is the one you never begin.", author: "Tony Robbins" },
+      { text: "In the end, we will remember not the words of our enemies, but the silence of our friends.", author: "Martin Luther King Jr." },
+      { text: "Do not go where the path may lead, go instead where there is no path and leave a trail.", author: "Ralph Waldo Emerson" }
+    ];
 
-    // Default markdown covers all required elements (User Story #5)
-    const defaultMarkdown = `# Markdown Previewer (H1)
+    const App = () => {
+      const [quote, setQuote] = useState({ text: "", author: "" });
 
-## Sub-heading (H2)
+      useEffect(() => {
+        getRandomQuote();
+      }, []);
 
-This is a paragraph with a [link to freeCodeCamp](https://www.freecodecamp.org).
-
-Here is some \`inline code\`.
-
-\`\`\`
-// Code block
-function greet(name) {
-  return \`Hello, \${name}!\`;
-}
-console.log(greet("Chioma"));
-\`\`\`
-
-- List item one
-- List item two
-- List item three
-
-> This is a blockquote showing quoted text.
-
-![React Logo](https://upload.wikimedia.org/wikipedia/commons/a/a7/React-icon.svg)
-
-**This text is bold to satisfy the requirement.**
-`;
-
-    function App() {
-      const [markdown, setMarkdown] = useState(defaultMarkdown);
+      const getRandomQuote = () => {
+        const randomIndex = Math.floor(Math.random() * quotes.length);
+        setQuote(quotes[randomIndex]);
+      };
 
       return (
-        <div className="container">
-          <h1>Markdown Previewer</h1>
-
-          <div className="panes">
-            <section className="panel">
-              <div className="panel-header">Editor</div>
-              <textarea
-                id="editor"
-                value={markdown}
-                onChange={(e) => setMarkdown(e.target.value)}
-                aria-label="Markdown editor"
-              />
-            </section>
-
-            <section className="panel">
-              <div className="panel-header">Preview</div>
-              <div
-                id="preview"
-                dangerouslySetInnerHTML={{
-                  __html: marked.parse(markdown),
-                }}
-              />
-            </section>
-          </div>
+        <div id="quote-box">
+          <div id="text">{quote.text}</div>
+          <div id="author">{quote.author}</div>
+          <button id="new-quote" onClick={getRandomQuote}>New Quote</button>
+          <a
+            id="tweet-quote"
+            href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(`"${quote.text}" - ${quote.author}`)}`}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Tweet
+          </a>
         </div>
       );
-    }
+    };
 
     ReactDOM.render(<App />, document.getElementById("root"));
   </script>
 </body>
 </html>
-

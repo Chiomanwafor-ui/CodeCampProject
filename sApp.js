@@ -1,51 +1,44 @@
-const { useState } = React;
+const { useState, useEffect } = React;
 
-function App() {
-  const defaultMarkdown = `# Welcome to my Markdown Previewer!
-  
-## This is a sub-heading
+const quotes = [
+  { text: "Life is what happens when you're busy making other plans.", author: "John Lennon" },
+  { text: "Get busy living or get busy dying.", author: "Stephen King" },
+  { text: "The only impossible journey is the one you never begin.", author: "Tony Robbins" },
+  { text: "In the end, we will remember not the words of our enemies, but the silence of our friends.", author: "Martin Luther King Jr." },
+  { text: "Do not go where the path may lead, go instead where there is no path and leave a trail.", author: "Ralph Waldo Emerson" }
+];
 
-Here is a [link](https://www.freecodecamp.org)
+const App = () => {
+  const [quote, setQuote] = useState({ text: "", author: "" });
 
-Here is some inline code: \`<div></div>\`
+  useEffect(() => {
+    getRandomQuote();
+  }, []);
+  const getRandomQuote = () => {
+    const randomIndex = Math.floor(Math.random() * quotes.length);
+    setQuote(quotes[randomIndex]);
+  };
 
-\`\`\`
-// This is a code block
-function helloWorld() {
-  return "Hello, world!";
-}
-\`\`\`
-
-- List item 1
-- List item 2
-- List item 3
-
-> This is a blockquote
-
-![React Logo](https://upload.wikimedia.org/wikipedia/commons/a/a7/React-icon.svg)
-
-**This is bold text**
-`;
-
-  const [text, setText] = useState(defaultMarkdown);
+  const tweetQuote = () => {
+    const tweetUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(`"${quote.text}" - ${quote.author}`)}`;
+    window.open(tweetUrl, "_blank");
+  };
 
   return (
-    <div className="container">
-      <h1 className="title">Markdown Previewer</h1>
-      <div className="editor-container">
-        <textarea
-          id="editor"
-          value={text}
-          onChange={(e) => setText(e.target.value)}
-        ></textarea>
-      </div>
-      <div
-        id="preview"
-        className="preview"
-        dangerouslySetInnerHTML={{ __html: marked.parse(text) }}
-      ></div>
+    <div id="quote-box">
+    <div id="text">{quote.text}</div>
+    <div id="author">{quote.author}</div>
+      <button id="new-quote" onClick={getRandomQuote}>New Quote</button>
+      <a 
+        id="tweet-quote" 
+        href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(`"${quote.text}" - ${quote.author}`)}`} 
+        target="_blank" 
+        rel="noopener noreferrer"
+      >
+        Tweet
+      </a>
     </div>
   );
-}
+};
 
 ReactDOM.render(<App />, document.getElementById("root"));
