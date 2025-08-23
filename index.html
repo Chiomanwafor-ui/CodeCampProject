@@ -1,127 +1,101 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Drum Machine</title>
-  <!-- FreeCodeCamp Test Script -->
-  <script src="https://cdn.freecodecamp.org/testable-projects-fcc/v1/bundle.js"></script>
-  <!-- React and Babel -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/react/17.0.2/umd/react.development.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/17.0.2/umd/react-dom.development.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/6.26.0/babel.min.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>JavaScript Calculator</title>
   <style>
     body {
-      font-family: Arial, sans-serif;
-      background: #222;
-      color: white;
       display: flex;
       justify-content: center;
       align-items: center;
       height: 100vh;
+      background: #1e1e2f;
+      margin: 0;
+      font-family: Arial, sans-serif;
     }
-    #drum-machine {
-      text-align: center;
-      background: #333;
+
+    #calculator {
+      background: #2e2e3e;
       padding: 20px;
-      border-radius: 10px;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+      width: 300px;
     }
+
     #display {
+      background: #000;
+      color: #0f0;
+      font-size: 2rem;
+      text-align: right;
+      padding: 15px;
+      border-radius: 8px;
       margin-bottom: 20px;
-      font-size: 1.2em;
-      background: #444;
-      padding: 10px;
-      border-radius: 5px;
+      overflow: hidden;
     }
-    .drum-pad {
-      width: 80px;
-      height: 80px;
-      margin: 5px;
-      background: #555;
-      border: none;
-      border-radius: 5px;
-      font-size: 1.5em;
-      color: white;
-      cursor: pointer;
-    }
-    .pad-container {
+
+    .buttons {
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
+      grid-template-columns: repeat(4, 1fr);
       gap: 10px;
+    }
+
+    button {
+      padding: 20px;
+      font-size: 1.2rem;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      background: #444;
+      color: white;
+      transition: background 0.2s;
+    }
+
+    button:hover {
+      background: #666;
+    }
+
+    #clear {
+      grid-column: span 2;
+      background: #e74c3c;
+    }
+
+    #equals {
+      grid-row: span 2;
+      background: #27ae60;
+    }
+
+    #zero {
+      grid-column: span 2;
     }
   </style>
 </head>
 <body>
-  <!-- React Root -->
-  <div id="root"></div>
-
-  <!-- Your JS goes here -->
-  <script type="text/babel">
-    const sounds = [
-      { key: "Q", id: "Heater-1", url: "https://s3.amazonaws.com/freecodecamp/drums/Heater-1.mp3" },
-      { key: "W", id: "Heater-2", url: "https://s3.amazonaws.com/freecodecamp/drums/Heater-2.mp3" },
-      { key: "E", id: "Heater-3", url: "https://s3.amazonaws.com/freecodecamp/drums/Heater-3.mp3" },
-      { key: "A", id: "Heater-4", url: "https://s3.amazonaws.com/freecodecamp/drums/Heater-4_1.mp3" },
-      { key: "S", id: "Clap", url: "https://s3.amazonaws.com/freecodecamp/drums/Heater-6.mp3" },
-      { key: "D", id: "Open-HH", url: "https://s3.amazonaws.com/freecodecamp/drums/Dsc_Oh.mp3" },
-      { key: "Z", id: "Kick-n'-Hat", url: "https://s3.amazonaws.com/freecodecamp/drums/Kick_n_Hat.mp3" },
-      { key: "X", id: "Kick", url: "https://s3.amazonaws.com/freecodecamp/drums/RP4_KICK_1.mp3" },
-      { key: "C", id: "Closed-HH", url: "https://s3.amazonaws.com/freecodecamp/drums/Cev_H2.mp3" }
-    ];
-
-    function DrumPad({ keyTrigger, clipId, url, playSound }) {
-      const handleKeyPress = (e) => {
-        if (e.key.toUpperCase() === keyTrigger) {
-          playSound(keyTrigger, clipId);
-        }
-      };
-
-      React.useEffect(() => {
-        document.addEventListener("keydown", handleKeyPress);
-        return () => document.removeEventListener("keydown", handleKeyPress);
-      });
-
-      return (
-        <button
-          className="drum-pad"
-          id={clipId}
-          onClick={() => playSound(keyTrigger, clipId)}
-        >
-          {keyTrigger}
-          <audio className="clip" id={keyTrigger} src={url}></audio>
-        </button>
-      );
-    }
-
-    function App() {
-      const [display, setDisplay] = React.useState("Play a sound");
-
-      const playSound = (keyTrigger, clipId) => {
-        const audio = document.getElementById(keyTrigger);
-        audio.currentTime = 0;
-        audio.play();
-        setDisplay(clipId);
-      };
-
-      return (
-        <div id="drum-machine">
-          <div id="display">{display}</div>
-          <div className="pad-container">
-            {sounds.map((sound) => (
-              <DrumPad
-                key={sound.key}
-                keyTrigger={sound.key}
-                clipId={sound.id}
-                url={sound.url}
-                playSound={playSound}
-              />
-            ))}
-          </div>
-        </div>
-      );
-    }
-
-    ReactDOM.render(<App />, document.getElementById("root"));
-  </script>
+  <div id="calculator">
+    <div id="display">0</div>
+    <div class="buttons">
+      <button id="clear">AC</button>
+      <button id="divide">/</button>
+      <button id="multiply">*</button>
+      
+      <button id="seven">7</button>
+      <button id="eight">8</button>
+      <button id="nine">9</button>
+      <button id="subtract">-</button>
+      
+      <button id="four">4</button>
+      <button id="five">5</button>
+      <button id="six">6</button>
+      <button id="add">+</button>
+      
+      <button id="one">1</button>
+      <button id="two">2</button>
+      <button id="three">3</button>
+      <button id="equals">=</button>
+      
+      <button id="zero">0</button>
+      <button id="decimal">.</button>
+    </div>
+  </div>
 </body>
 </html>
